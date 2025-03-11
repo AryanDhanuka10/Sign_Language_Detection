@@ -1,91 +1,94 @@
-# 🤟 Sign Language Detection using AI
+# 🖐️ Sign Language Detection
 
-## 📌 Project Overview
-Sign Language Detection using AI is a deep learning-based project designed to recognize and interpret sign language gestures. The model leverages Convolutional Neural Networks (CNNs) and other machine learning techniques to classify hand signs, enabling better communication for individuals with hearing impairments.
+A deep learning-based **Sign Language Detection** project that classifies American Sign Language (ASL) hand gestures.
 
-## 🚀 Features
-- Converts sign language gestures into readable text
-- Utilizes CNN for image-based classification
-- Supports ONNX to Keras model conversion
-- Deployable as a web application
-- Multi-modal approach: text-based input and image-based predictions
+## 🚀 Live Demo
+🔗 **[Sign Language Detection App](https://signlanguagedetection-aryandhanuka10.streamlit.app/)**
 
-## 🛠️ Technologies Used
-- **Python** 🐍
-- **TensorFlow & Keras** 🔥
-- **OpenCV** 🎥
-- **ONNX & ONNX2Keras** 🔄
-- **Flask / Streamlit** 🌐 (for deployment)
+---
 
-## 📂 Project Structure
-```
-SignLanguageDetectionUsingAI/
-│── dataset/             # Training and validation images
-│── models/              # Trained model files
-│── src/
-│   ├── train.py         # Model training script
-│   ├── predict.py       # Prediction script
-│   ├── convert_to_h5.py # ONNX to Keras conversion script
-│── web_app/
-│   ├── app.py          # Web app for live detection
-│── README.md
-```
+## 📌 Features
+- 🏗 **CNN Model** trained on ASL dataset
+- 📷 **Real-time gesture recognition**
+- 🖼 **Image-based classification**
+- 📊 **Data preprocessing and augmentation**
+- 🌍 **Deployed using Streamlit**
 
-## 🎯 Installation & Setup
-Follow these steps to set up the project:
+---
 
-### 1️⃣ Clone the Repository
+## 📥 How to Run Locally
+
+### **1️⃣ Clone the Repository**
 ```bash
-git clone https://github.com/AryanDhanuka10/SignLanguageDetectionUsingAI.git
-cd SignLanguageDetectionUsingAI
+git clone https://github.com/AryanDhanuka10/Sign_Language_Detection.git
+cd Sign_Language_Detection
 ```
 
-### 2️⃣ Create a Virtual Environment
+### **2️⃣ Setup Virtual Environment**
 ```bash
-python -m venv sign_env
-source sign_env/bin/activate  # On macOS/Linux
-sign_env\Scripts\activate    # On Windows
+pip install virtualenv
+virtualenv venv
+source venv/bin/activate   # On Windows, use: venv\Scripts\activate
 ```
 
-### 3️⃣ Install Dependencies
+### **3️⃣ Install Dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Convert ONNX to Keras (if needed)
+### **4️⃣ Run the Application**
 ```bash
-python src/convert_to_h5.py
+streamlit run app.py
 ```
-
-### 5️⃣ Run the Web App
-```bash
-python web_app/app.py
-```
-
-## 📸 Model Training
-To train the model, run:
-```bash
-python src/train.py
-```
-
-## 🏆 Results & Performance
-- CNN Validation Accuracy: **63.25%**
-- Logistic Regression Accuracy: **72.14%**
-- Improvements underway to enhance accuracy
-
-## 🛠 Troubleshooting
-- **ONNX to Keras conversion error?** Ensure `onnx2keras` is updated:
-  ```bash
-  pip install --upgrade onnx2keras
-  ```
-- **GPU not detected?** Disable secure boot or install proper NVIDIA drivers.
-
-## 🤝 Contributing
-Contributions are welcome! Feel free to fork, submit issues, or create pull requests.
-
-## 📜 License
-MIT License © 2025 Aryan Dhanuka
 
 ---
-### ✨ Made with ❤️ by [AryanDhanuka10](https://github.com/AryanDhanuka10)
+
+## 📊 Dataset
+The dataset used is an **American Sign Language (ASL) alphabet dataset** (excluding the letters 'J' and 'Z' as they require motion).
+
+📌 **Dataset Source**: Available on **Kaggle**
+
+🖼 **Sample Image**:
+![ASL Alphabet](src/images/asl.png)
+
+---
+
+## 🛠 Model Architecture
+The project is built using **Convolutional Neural Networks (CNNs)** to classify ASL hand gestures.
+
+### 🔹 **Layers Used**:
+- **Conv2D**: Extracts spatial features from images.
+- **BatchNormalization**: Normalizes activations to improve training.
+- **MaxPooling2D**: Reduces feature dimensions while preserving important information.
+- **Dropout**: Prevents overfitting by randomly deactivating neurons.
+- **Flatten**: Converts multidimensional tensors into vectors.
+- **Dense**: Fully connected layers for classification.
+
+📌 **Model Visualization**:
+<img src="src/images/cnn.png" width="400px" />
+
+---
+
+## 🚀 Deployment
+The project is deployed on **Streamlit**. You can access the live demo here:
+
+🌐 **[Sign Language Detection App](https://signlanguagedetection-aryandhanuka10.streamlit.app/)**
+
+---
+
+## 🎯 Future Improvements
+- 🎥 **Add real-time video detection**
+- 🤖 **Enhance model accuracy with more training data**
+- 📊 **Implement Transfer Learning using pre-trained models**
+- 📱 **Deploy as a mobile app**
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! If you find a bug or want to improve the model, feel free to submit a **Pull Request**.
+
+---
+
+## 📜 License
+This project is **open-source** and available under the [MIT License](LICENSE).
 
