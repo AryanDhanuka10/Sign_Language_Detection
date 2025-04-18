@@ -5,7 +5,7 @@ from tensorflow.keras.models import load_model
 import time
 
 # Load the trained model
-model_path = "artifacts/model/sign_language_model.h5"
+model_path = "sign_language_model.h5"
 model = load_model(model_path)
 
 # Label mapping
