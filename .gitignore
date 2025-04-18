@@ -1,0 +1,49 @@
+# Ignore artifacts folder (contains models, logs, etc.)
+artifacts/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE/editor-specific files
+.vscode/
+*.swp
+*.swo
+*.idea/
+*.iml
+
+# Log files
+logs/
+*.log
+
+# Environment files
+.env
+*.env
+*.ini
+*.cfg
+
+# Ignore dataset and model files
+*.h5
+*.pkl
+*.joblib
+*.ckpt
+
+# Ignore large data files
+*.csv
+*.tsv
+*.json
+*.zip
+*.tar.gz
+
+# Ignore cached models from Hugging Face or other sources
+models/
+.cache/
