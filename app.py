@@ -5,19 +5,21 @@ from tensorflow.keras.models import load_model
 import time
 import gdown
 
+# Disable oneDNN optimizations (optional but consistent)
+import os
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "-1"
+
+# Google Drive model download
 file_id = "1kf2lXMvj3kr-uFKoJR54VZWjQBdpVWcN"
 url = f"https://drive.google.com/uc?id={file_id}"
 model_path = "sign_language_model.h5"
 
-
-gdown.download(url, model_path, quiet=False)
-
+if not os.path.exists(model_path):
+    gdown.download(url, model_path, quiet=False)
 
 model = load_model(model_path)
 
-print("Model loaded successfully.")
-
-# Label mapping
+# Class labels
 class_labels = {
     0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
     10: 'A', 11: 'B', 12: 'C', 13: 'D', 14: 'E', 15: 'F', 16: 'G', 17: 'H', 18: 'I', 19: 'J',
@@ -25,64 +27,54 @@ class_labels = {
     30: 'U', 31: 'V', 32: 'W', 33: 'X', 34: 'Y', 35: 'Z', 36: '_'
 }
 
-# Preprocessing function
 def preprocess_frame(frame):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    resized = cv2.resize(gray_frame, (64, 64))
-    resized = np.expand_dims(resized, axis=-1)
-    resized = np.expand_dims(resized, axis=0)
-    resized = resized / 255.0
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    resized = cv2.resize(gray, (64, 64))
+    resized = resized.reshape(1, 64, 64, 1) / 255.0
     return resized
 
-# Streamlit Setup
-st.set_page_config(page_title="Sign Language Detection", layout="centered")
-st.title("🖐️ Real-time Sign Language Detection")
-st.write("Place your hand inside the white box in the webcam feed to detect your gesture!")
+# Streamlit UI
+st.set_page_config(page_title="Sign Language Detector", layout="centered")
+st.title("🖐️ Real-Time Sign Language Detection")
+st.sidebar.write("🔍 Toggle webcam to start/stop")
+run_webcam = st.sidebar.toggle("Enable Webcam", value=False)
 
-run_webcam = st.sidebar.toggle("Enable Webcam", value=True, key="enable_webcam")
-
+# Webcam Stream
 if run_webcam:
     cap = cv2.VideoCapture(0)
     stframe = st.empty()
 
-    # Guide box
     box_start = (220, 140)
     box_end = (420, 340)
 
-    while True:
+    stop = st.sidebar.button("Stop Webcam")
+
+    while cap.isOpened() and not stop:
         ret, frame = cap.read()
         if not ret:
-            st.sidebar.error("❌ Failed to capture frame")
+            st.error("❌ Cannot access webcam.")
             break
 
-        # Resize for smoother processing
         frame = cv2.resize(frame, (640, 480))
-
-        # Draw ROI box
         cv2.rectangle(frame, box_start, box_end, (255, 255, 255), 2)
-        cv2.putText(frame, "Place hand here", (box_start[0], box_start[1] - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
-        # Region of Interest
         roi = frame[box_start[1]:box_end[1], box_start[0]:box_end[0]]
 
-        # Predict
-        processed = preprocess_frame(roi)
-        prediction = model.predict(processed)
-        predicted_class = np.argmax(prediction, axis=1)[0]
-        predicted_label = class_labels.get(predicted_class, "Unknown")
+        # Prediction
+        input_data = preprocess_frame(roi)
+        prediction = model.predict(input_data)
+        predicted_label = class_labels.get(np.argmax(prediction), "Unknown")
 
-        # Show prediction
         cv2.putText(frame, f"Prediction: {predicted_label}", (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        # Convert & display in smaller window (no fullscreen)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        stframe.image(frame_rgb, channels="RGB", width=640)  # fixed width to avoid fullscreen
+        stframe.image(frame_rgb, channels="RGB", width=640)
 
-        # Optional FPS control to reduce CPU load
+        # Reduce load
         time.sleep(0.05)
 
     cap.release()
-    st.sidebar.success("✅ Webcam released")
+    st.sidebar.success("✅ Webcam Stopped")
+
+else:
+    st.info("📷 Webcam is disabled. Toggle it ON from the sidebar to start prediction.")
