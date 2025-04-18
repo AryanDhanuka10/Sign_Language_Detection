@@ -7,7 +7,7 @@ import gdown
 from PIL import Image
 import os
 
-# Disable oneDNN optimization (for consistent behavior)
+# Disable oneDNN optimizations for consistent behavior (optional)
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "-1"
 
 # Google Drive model download if not exists
@@ -34,32 +34,31 @@ def preprocess_frame(frame):
     resized = resized.reshape(1, 64, 64, 1) / 255.0
     return resized
 
-def preprocess_image_pil(img):
-    img = img.convert("L")  # Grayscale
-    img = img.resize((64, 64))
-    img_array = np.array(img).reshape(1, 64, 64, 1) / 255.0
-    return img_array
-
 # Streamlit UI
 st.set_page_config(page_title="Sign Language Detector", layout="centered")
 st.title("🖐️ Real-Time Sign Language Detection")
 
-mode = st.sidebar.radio("Select Mode:", ["📸 Photo (Web Compatible)", "🎥 Live Webcam (Local Only)"])
+# Choose mode (Webcam or Photo)
+mode = st.sidebar.radio("Select Mode:", ["📸 Photo (Web Compatible)", "🎥 Live Webcam (Local & Cloud)"])
 
-if mode == "🎥 Live Webcam (Local Only)":
+if mode == "🎥 Live Webcam (Local & Cloud)":
+    # Local Webcam (OpenCV) and Cloud Webcam (camera_input)
     run_webcam = st.sidebar.button("▶ Start Webcam")
     stop_webcam = st.sidebar.button("⏹ Stop Webcam")
+
     if run_webcam and not stop_webcam:
+        # Local webcam with OpenCV (for local environments)
         cap = cv2.VideoCapture(0)
         stframe = st.empty()
         box_start = (220, 140)
         box_end = (420, 340)
+
         st.info("✅ Webcam running... Click 'Stop Webcam' in the sidebar to end session.")
 
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
-                st.error("❌ Could not access webcam. Use '📸 Photo' mode instead.")
+                st.error("❌ Could not access webcam.")
                 break
 
             frame = cv2.resize(frame, (640, 480))
@@ -84,7 +83,7 @@ if mode == "🎥 Live Webcam (Local Only)":
         cap.release()
         st.sidebar.success("🛑 Webcam stopped.")
     else:
-        st.info("ℹ️ Click 'Start Webcam' to begin real-time detection (works only locally).")
+        st.info("ℹ️ Click 'Start Webcam' to begin real-time detection (works both locally and on Streamlit Cloud).")
 
 else:  # 📸 Photo mode
     st.write("📷 Use your webcam to take a snapshot")
@@ -92,7 +91,7 @@ else:  # 📸 Photo mode
 
     if img_data is not None:
         img = Image.open(img_data)
-        input_data = preprocess_image_pil(img)
+        input_data = preprocess_frame(np.array(img))
         prediction = model.predict(input_data)
         predicted_label = class_labels.get(np.argmax(prediction), "Unknown")
 
