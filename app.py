@@ -48,7 +48,7 @@ if mode == "🎥 Live Webcam (Local & Cloud)":
 
     if run_webcam and not stop_webcam:
         # Local webcam with OpenCV (for local environments)
-        cap = cv2.VideoCapture(2)
+        cap = cv2.VideoCapture(100)
         stframe = st.empty()
         box_start = (220, 140)
         box_end = (420, 340)
