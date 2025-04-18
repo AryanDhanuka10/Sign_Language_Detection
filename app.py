@@ -4,12 +4,13 @@ import numpy as np
 from tensorflow.keras.models import load_model
 import time
 import gdown
-
-# Disable oneDNN optimizations (optional but consistent)
+from PIL import Image
 import os
+
+# Disable oneDNN optimization (for consistent behavior)
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "-1"
 
-# Google Drive model download
+# Google Drive model download if not exists
 file_id = "1kf2lXMvj3kr-uFKoJR54VZWjQBdpVWcN"
 url = f"https://drive.google.com/uc?id={file_id}"
 model_path = "sign_language_model.h5"
@@ -33,48 +34,67 @@ def preprocess_frame(frame):
     resized = resized.reshape(1, 64, 64, 1) / 255.0
     return resized
 
+def preprocess_image_pil(img):
+    img = img.convert("L")  # Grayscale
+    img = img.resize((64, 64))
+    img_array = np.array(img).reshape(1, 64, 64, 1) / 255.0
+    return img_array
+
 # Streamlit UI
 st.set_page_config(page_title="Sign Language Detector", layout="centered")
 st.title("🖐️ Real-Time Sign Language Detection")
-st.sidebar.write("🔍 Toggle webcam to start/stop")
-run_webcam = st.sidebar.toggle("Enable Webcam", value=False)
 
-# Webcam Stream
-if run_webcam:
-    cap = cv2.VideoCapture(0)
-    stframe = st.empty()
+mode = st.sidebar.radio("Select Mode:", ["📸 Photo (Web Compatible)", "🎥 Live Webcam (Local Only)"])
 
-    box_start = (220, 140)
-    box_end = (420, 340)
+if mode == "🎥 Live Webcam (Local Only)":
+    run_webcam = st.sidebar.button("▶ Start Webcam")
+    stop_webcam = st.sidebar.button("⏹ Stop Webcam")
+    if run_webcam and not stop_webcam:
+        cap = cv2.VideoCapture(0)
+        stframe = st.empty()
+        box_start = (220, 140)
+        box_end = (420, 340)
+        st.info("✅ Webcam running... Click 'Stop Webcam' in the sidebar to end session.")
 
-    stop = st.sidebar.button("Stop Webcam")
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                st.error("❌ Could not access webcam. Use '📸 Photo' mode instead.")
+                break
 
-    while cap.isOpened() and not stop:
-        ret, frame = cap.read()
-        if not ret:
-            st.error("❌ Cannot access webcam.")
-            break
+            frame = cv2.resize(frame, (640, 480))
+            cv2.rectangle(frame, box_start, box_end, (255, 255, 255), 2)
+            roi = frame[box_start[1]:box_end[1], box_start[0]:box_end[0]]
 
-        frame = cv2.resize(frame, (640, 480))
-        cv2.rectangle(frame, box_start, box_end, (255, 255, 255), 2)
-        roi = frame[box_start[1]:box_end[1], box_start[0]:box_end[0]]
+            # Prediction
+            input_data = preprocess_frame(roi)
+            prediction = model.predict(input_data)
+            predicted_label = class_labels.get(np.argmax(prediction), "Unknown")
 
-        # Prediction
-        input_data = preprocess_frame(roi)
+            cv2.putText(frame, f"Prediction: {predicted_label}", (10, 470),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            stframe.image(frame_rgb, channels="RGB", width=640)
+
+            time.sleep(0.05)
+            if stop_webcam:
+                break
+
+        cap.release()
+        st.sidebar.success("🛑 Webcam stopped.")
+    else:
+        st.info("ℹ️ Click 'Start Webcam' to begin real-time detection (works only locally).")
+
+else:  # 📸 Photo mode
+    st.write("📷 Use your webcam to take a snapshot")
+    img_data = st.camera_input("Capture Gesture")
+
+    if img_data is not None:
+        img = Image.open(img_data)
+        input_data = preprocess_image_pil(img)
         prediction = model.predict(input_data)
         predicted_label = class_labels.get(np.argmax(prediction), "Unknown")
 
-        cv2.putText(frame, f"Prediction: {predicted_label}", (10, 470),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        stframe.image(frame_rgb, channels="RGB", width=640)
-
-        # Reduce load
-        time.sleep(0.05)
-
-    cap.release()
-    st.sidebar.success("✅ Webcam Stopped")
-
-else:
-    st.info("📷 Webcam is disabled. Toggle it ON from the sidebar to start prediction.")
+        st.image(img, caption="Captured Image", width=300)
+        st.success(f"✅ Prediction: **{predicted_label}**")
