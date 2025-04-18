@@ -8,8 +8,8 @@ from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 # Define paths
-data_path = '../artifacts/data/'
-model_save_path = '../artifacts/model/sign_language_model.h5'
+data_path = 'artifacts/data/'
+model_save_path = 'artifacts/model/sign_language_model.h5'
 
 # Image parameters
 img_size = (64, 64)  # Resized image dimensions
