@@ -19,6 +19,7 @@ class_labels = {
 # Preprocessing function
 def preprocess_frame(frame):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
     resized = cv2.resize(gray_frame, (64, 64))
     resized = np.expand_dims(resized, axis=-1)
     resized = np.expand_dims(resized, axis=0)
