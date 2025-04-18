@@ -3,10 +3,19 @@ import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 import time
+import gdown
 
-# Load the trained model
+file_id = "1kf2lXMvj3kr-uFKoJR54VZWjQBdpVWcN"
+url = f"https://drive.google.com/uc?id={file_id}"
 model_path = "sign_language_model.h5"
+
+
+gdown.download(url, model_path, quiet=False)
+
+
 model = load_model(model_path)
+
+print("Model loaded successfully.")
 
 # Label mapping
 class_labels = {
@@ -19,7 +28,7 @@ class_labels = {
 # Preprocessing function
 def preprocess_frame(frame):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    
+
     resized = cv2.resize(gray_frame, (64, 64))
     resized = np.expand_dims(resized, axis=-1)
     resized = np.expand_dims(resized, axis=0)
