@@ -3,7 +3,7 @@
 A deep learning-based **Sign Language Detection** project that classifies American Sign Language (ASL) hand gestures.
 
 ## 🚀 Live Demo
-🔗 **[Sign Language Detection App](https://signlanguagedetection-aryandhanuka10.streamlit.app/)**
+🔗 **[Sign Language Detection App](https://signlanguagedetection-gcwbgbyxnlkgorwbdhaukj.streamlit.app/)**
 
 ---
 
